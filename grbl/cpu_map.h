@@ -502,7 +502,7 @@
   // Define step pulse output pins. NOTE: All step bit pins must be on the same port.
   #define STEP_DDR        LPC_GPIO2->FIODIR
   #define STEP_PORT       LPC_GPIO2->FIOPIN
-  #define X_STEP_BIT      0
+  #define X_STEP_BIT      3 // linanw: use E0 as X
   #define Y_STEP_BIT      1
   #define Z_STEP_BIT      2
   #define A_STEP_BIT      3
@@ -511,7 +511,7 @@
   // Define step direction output pins. NOTE: All direction pins must be on the same port.
   #define DIRECTION_DDR     LPC_GPIO0->FIODIR
   #define DIRECTION_PORT    LPC_GPIO0->FIOPIN
-  #define X_DIRECTION_BIT   5
+  #define X_DIRECTION_BIT   22 // linanw: use E0 as X
   #define Y_DIRECTION_BIT   11
   #define Z_DIRECTION_BIT   20
   #define A_DIRECTION_BIT   22
@@ -520,7 +520,7 @@
   // Define stepper driver enable/disable output pin.
   #define STEPPERS_DISABLE_DDR    LPC_GPIO0->FIODIR
   #define STEPPERS_DISABLE_PORT   LPC_GPIO0->FIOPIN
-  #define X_DISABLE_BIT           4
+  #define X_DISABLE_BIT           21 // linanw: use E0 as X
   #define Y_DISABLE_BIT           10
   #define Z_DISABLE_BIT           19
   #define A_DISABLE_BIT           21
