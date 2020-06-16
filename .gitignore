@@ -6,3 +6,5 @@
 
 build
 README.md
+gcc-arm-none-eabi-9-2020-q2-update
+export_arm_path.sh
