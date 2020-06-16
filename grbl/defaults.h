@@ -27,6 +27,61 @@
 
 #ifndef defaults_h
 
+#ifdef DEFAULTS_LINANW_MINI_MILL
+  // Grbl generic default settings. Should work across different machines.
+  // See https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration for setting descriptions.
+  #define DEFAULT_X_STEPS_PER_MM 800.0       // $100 steps (X steps per mm)
+  #define DEFAULT_Y_STEPS_PER_MM 800.0       // $101 steps (Y steps per mm)
+  #define DEFAULT_Z_STEPS_PER_MM 800.0       // $102 steps (Z steps per mm)
+  #define DEFAULT_A_STEPS_PER_MM 160.0       // $103 steps (A steps per mm)
+  #define DEFAULT_X_MAX_RATE 10000.0           // $110 mm/min (X max speed)
+  #define DEFAULT_Y_MAX_RATE 10000.0           // $111 mm/min (Y max speed)
+  #define DEFAULT_Z_MAX_RATE 10000.0           // $112 mm/min (Z max speed)
+  #define DEFAULT_A_MAX_RATE 10000.0           // $113 mm/min (A max speed)
+  #define DEFAULT_X_ACCELERATION (200*60*60)// $120 mm/min^2 (X max acceleration)
+  #define DEFAULT_Y_ACCELERATION (200.0*60*60)// $121 mm/min^2 (Y max acceleration)
+  #define DEFAULT_Z_ACCELERATION (200.0*60*60)// $122 mm/min^2 (Z max acceleration)
+  #define DEFAULT_A_ACCELERATION (10.0*60*60)// $123 mm/min^2 (A max acceleration)
+  #define DEFAULT_X_MAX_TRAVEL 123.0         // $130 mm (X max travel; must be positive)
+  #define DEFAULT_Y_MAX_TRAVEL 202.0         // $131 mm (Y max travel; must be positive)
+  #define DEFAULT_Z_MAX_TRAVEL 82.0         // $132 mm (Z max travel; must be positive)
+  #define DEFAULT_A_MAX_TRAVEL 1.0           // $133 mm (A max travel; must be positive)
+  #define DEFAULT_X_CURRENT 0.0              // $140 amps (X stepper current [disabled])
+  #define DEFAULT_Y_CURRENT 0.0              // $141 amps (Y stepper current [disabled])
+  #define DEFAULT_Z_CURRENT 0.0              // $142 amps (Z stepper current [disabled])
+  #define DEFAULT_A_CURRENT 0.0              // $143 amps (A stepper current [disabled])
+
+  #define DEFAULT_STEP_PULSE_MICROSECONDS 10 // $0  usec (stepper pulse time)
+  #define DEFAULT_STEPPER_IDLE_LOCK_TIME 255  // $1  msec (0-254, 255 keeps steppers enabled)
+  #define DEFAULT_STEPPING_INVERT_MASK 7     // $2  ZYX (e.g., 0x5 inverts Z and X stepper pulses)
+  #define DEFAULT_DIRECTION_INVERT_MASK 5    // $3  ZYX (e.g., 0x2 inverts Y stepper direction)
+  #define DEFAULT_INVERT_ST_ENABLE 0         // $4  bool (inverts stepper enable pin)
+  #define DEFAULT_INVERT_LIMIT_PINS 1        // $5  bool (inverts limit switches to trigger on high)
+  #define DEFAULT_INVERT_PROBE_PIN 0         // $6  bool (inverts probe to trigger on high)
+  #define DEFAULT_STATUS_REPORT_MASK 2       // $10 bits (Reports: [0=WPos or 1=MPos] and [2=Buffer])
+  #define DEFAULT_JUNCTION_DEVIATION 0.01    // $11 mm (determines machine speed through corners)
+  #define DEFAULT_ARC_TOLERANCE 0.002        // $12 mm (error tolerance on arcs/cicles)
+  #define DEFAULT_REPORT_INCHES 0            // $13 bool (sets position reporting to inches)
+  #define DEFAULT_SOFT_LIMIT_ENABLE 0        // $20 bool (prevents moves outside *_MAX_TRAVEL; requires $23=1)
+  #define DEFAULT_HARD_LIMIT_ENABLE 0        // $21 bool ([ignored] stops moving when limit switches triggered)
+  #define DEFAULT_HOMING_ENABLE 1            // $22 bool (enables homing on startup)
+  #define DEFAULT_HOMING_DIR_MASK 3          // $23 ZYX (e.g., 0x3 reverses XY homing to negative direction)
+  #define DEFAULT_HOMING_FEED_RATE 100.0      // $24 mm/min (homing precision location speed)
+  #define DEFAULT_HOMING_SEEK_RATE 1000.0     // $25 mm/min (homing search speed)
+  #define DEFAULT_HOMING_DEBOUNCE_DELAY 25  // $26 msec (homing switch debounce: 0-65k)
+  #define DEFAULT_HOMING_PULLOFF 1.0         // $27 mm (retracts this far from homing switch)
+  #define DEFAULT_SPINDLE_RPM_MAX 1000.0     // $30 RPM (spindle speed for max 5V PWM output)
+  #define DEFAULT_SPINDLE_RPM_MIN 0.0        // $31 RPM (spindle speed for min 20mV PWM output)
+  #define DEFAULT_LASER_MODE 0               // $32 bool (adjusts spindle power with speed for lasers)
+  #define DEFAULT_SPINDLE_PWM_FREQ 5000      // $33 Hz (PWM frequency for spindle)
+  #define DEFAULT_SPINDLE_PWM_OFF_VALUE 0    // $34 % (% of PWM when spindle is off)
+  #define DEFAULT_SPINDLE_PWM_MIN_VALUE 1    // $35 % (% of PWM when spindle is at lowest setting)
+  #define DEFAULT_SPINDLE_PWM_MAX_VALUE 100  // $36 % (% of PWM when spindle is at highest setting)
+  // Up to 4 HOMING_CYCLE_x can be defined (0-3), specifying which axes are homed and in which order
+  #define HOMING_CYCLE_0 (1<<Z_AXIS)
+  #define HOMING_CYCLE_1 ((1<<X_AXIS)|(1<<Y_AXIS))
+#endif // end of DEFAULTS_LINANW_MINI_MILL
+
 #ifdef DEFAULTS_GENERIC
   // Grbl generic default settings. Should work across different machines.
   // See https://github.com/gnea/grbl/wiki/Grbl-v1.1-Configuration for setting descriptions.

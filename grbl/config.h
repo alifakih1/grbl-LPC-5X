@@ -43,8 +43,9 @@
 //#define SPINDLE_PWM_PIN_2_4
 
 // Define machine type for machine specific defaults
+#define DEFAULTS_LINANW_MINI_MILL
 //#define DEFAULTS_GENERIC
-#define DEFAULTS_K40
+//#define DEFAULTS_K40
 //#define DEFAULTS_FABKIT
 //#define DEFAULTS_JONAS
 
