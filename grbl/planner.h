@@ -57,6 +57,7 @@ typedef struct {
   uint32_t steps[N_AXIS];    // Step count along each axis
   uint32_t step_event_count; // The maximum step axis count and number of steps required to complete this block.
   uint32_t direction_bits;   // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
+  uint32_t direction_bits_ext;   // The direction bit set for this block (refers to *_DIRECTION_BIT in config.h)
 
   // Block condition data to ensure correct execution depending on states and overrides.
   uint8_t condition;      // Block bitflag variable defining block run conditions. Copied from pl_line_data.

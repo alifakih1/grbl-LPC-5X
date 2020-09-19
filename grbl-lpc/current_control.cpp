@@ -56,6 +56,7 @@ void current_init()
     set_current(1, settings.current[1]);
     set_current(2, settings.current[2]);
     set_current(3, settings.current[3]);
+    set_current(4, settings.current[4]);
 #endif
 }
 

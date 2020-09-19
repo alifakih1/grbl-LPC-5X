@@ -506,16 +506,23 @@
   #define Y_STEP_BIT      1
   #define Z_STEP_BIT      2
   #define A_STEP_BIT      3
-  #define STEP_MASK       ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT)|(1<<A_STEP_BIT)) // All step bits
+  #define B_STEP_BIT      8
+  #define STEP_MASK       ((1<<X_STEP_BIT)|(1<<Y_STEP_BIT)|(1<<Z_STEP_BIT)|(1<<A_STEP_BIT)|(1<<B_STEP_BIT)) // All step bits
 
   // Define step direction output pins. NOTE: All direction pins must be on the same port.
   #define DIRECTION_DDR     LPC_GPIO0->FIODIR
-  #define DIRECTION_PORT    LPC_GPIO0->FIOPIN
+  #define DIRECTION_PORT    LPC_GPIO0->FIOPIN // requires interrupt, only GPIO0 & GPIO2 has interrupt.
   #define X_DIRECTION_BIT   5
   #define Y_DIRECTION_BIT   11
   #define Z_DIRECTION_BIT   20
   #define A_DIRECTION_BIT   22
   #define DIRECTION_MASK    ((1<<X_DIRECTION_BIT)|(1<<Y_DIRECTION_BIT)|(1<<Z_DIRECTION_BIT)|(1<<A_DIRECTION_BIT)) // All direction bits
+
+  #define DIRECTION_DDR_EXT   LPC_GPIO2->FIODIR
+  #define DIRECTION_PORT_EXT  LPC_GPIO2->FIOPIN // requires interrupt, only GPIO0 & GPIO2 has interrupt.
+  #define B_DIRECTION_BIT   13
+  #define DIRECTION_MASK_EXT  (1<<B_DIRECTION_BIT) // Extra direction bits
+
 
   // Define stepper driver enable/disable output pin.
   #define STEPPERS_DISABLE_DDR    LPC_GPIO0->FIODIR
@@ -526,16 +533,22 @@
   #define A_DISABLE_BIT           21
   #define STEPPERS_DISABLE_MASK   ((1<<X_DISABLE_BIT)|(1<<Y_DISABLE_BIT)|(1<<Z_DISABLE_BIT)|(1<<A_DISABLE_BIT))
 
+  #define STEPPERS_DISABLE_DDR_EXT    LPC_GPIO4->FIODIR
+  #define STEPPERS_DISABLE_PORT_EXT   LPC_GPIO4->FIOPIN
+  #define B_DISABLE_BIT           29
+  #define STEPPERS_DISABLE_MASK_EXT   (1<<B_DISABLE_BIT)
+
   // Define homing/hard limit switch input pins and limit interrupt vectors.
   // NOTE: All limit bit pins must be on the same port, but not on a port with other input pins (CONTROL).
   #define LIMIT_DDR         LPC_GPIO1->FIODIR
   #define LIMIT_PIN         LPC_GPIO1->FIOPIN
   #define LIMIT_PORT        LPC_GPIO1->FIOPIN
-  #define X_LIMIT_BIT       24  // X-MIN=24, X-MAX=25
-  #define Y_LIMIT_BIT       26  // Y-MIN=26, Y-MAX=27
-  #define Z_LIMIT_BIT       28  // Z-MIN=28, Z-MAX=29
-  #define A_LIMIT_BIT       29  // reuse p1.29
-  #define LIMIT_MASK       ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)|(1<<A_LIMIT_BIT)) // All limit bits
+  #define X_LIMIT_BIT       24  // X-MIN-MAX=24
+  #define Y_LIMIT_BIT       26  // Y-MIN-MAX=26
+  #define Z_LIMIT_BIT       28  // Z-MIN-MAX=28
+  #define A_LIMIT_BIT       27  // A-MIN-MAX=28
+  #define B_LIMIT_BIT       28  // B-MIN-MAX=28
+  #define LIMIT_MASK       ((1<<X_LIMIT_BIT)|(1<<Y_LIMIT_BIT)|(1<<Z_LIMIT_BIT)|(1<<A_LIMIT_BIT)|(1<<B_LIMIT_BIT)) // All limit bits
 
   // Define spindle enable and spindle direction output pins.
   #define SPINDLE_ENABLE_DDR        LPC_GPIO1->FIODIR
@@ -573,7 +586,7 @@
   #define PROBE_DDR       LPC_GPIO1->FIODIR
   #define PROBE_PIN       LPC_GPIO1->FIOPIN
   #define PROBE_PORT      LPC_GPIO1->FIOPIN
-  #define PROBE_BIT       27  // reuse P1.27 from Y-MAX
+  #define PROBE_BIT       29
   #define PROBE_MASK      (1<<PROBE_BIT)
 
   // The LPC17xx has 6 PWM channels. Each channel has 2 pins. It can drive both pins simultaneously to the same value.

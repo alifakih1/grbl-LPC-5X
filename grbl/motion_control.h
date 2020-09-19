@@ -32,7 +32,7 @@
 #define HOMING_CYCLE_Y    bit(Y_AXIS)
 #define HOMING_CYCLE_Z    bit(Z_AXIS)
 #define HOMING_CYCLE_A    bit(A_AXIS)
-//#define HOMING_CYCLE_B    bit(B_AXIS)
+#define HOMING_CYCLE_B    bit(B_AXIS)
 //#define HOMING_CYCLE_C    bit(C_AXIS)
 
 

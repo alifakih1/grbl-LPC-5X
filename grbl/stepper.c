@@ -67,6 +67,7 @@ typedef struct {
   uint32_t steps[N_AXIS];
   uint32_t step_event_count;
   uint32_t direction_bits;
+  uint32_t direction_bits_ext;
   #ifdef VARIABLE_SPINDLE
     uint8_t is_pwm_rate_adjusted; // Tracks motions that require constant laser power/rate
   #endif
@@ -98,8 +99,8 @@ typedef struct {
   uint32_t counter_x,        // Counter variables for the bresenham line tracer
            counter_y,
            counter_z,
-           counter_a;
-           //counter_b,
+           counter_a,
+           counter_b;
            //counter_c;
   #ifdef STEP_PULSE_DELAY
     uint32_t step_bits;  // Stores out_bits output to complete the step pulse delay
@@ -110,6 +111,7 @@ typedef struct {
   uint32_t step_pulse_time; // Step pulse width
   uint32_t step_outbits;         // The next stepping-bits to be output
   uint32_t dir_outbits;
+  uint32_t dir_outbits_ext;
   #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
     uint32_t steps[N_AXIS];
   #endif
@@ -129,6 +131,7 @@ static uint8_t segment_next_head;
 // Step and direction port invert masks.
 static uint32_t step_port_invert_mask;
 static uint32_t dir_port_invert_mask;
+static uint32_t dir_port_invert_mask_ext;
 
 // Used to avoid ISR nesting of the "Stepper Driver Interrupt". Should never occur though.
 static volatile uint8_t busy;
@@ -217,8 +220,16 @@ static st_prep_t prep;
 void st_wake_up()
 {
   // Enable stepper drivers.
-  if (bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE)) { STEPPERS_DISABLE_PORT |= STEPPERS_DISABLE_MASK; }
-  else { STEPPERS_DISABLE_PORT &= ~STEPPERS_DISABLE_MASK; }
+  if (bit_istrue(settings.flags, BITFLAG_INVERT_ST_ENABLE))
+  {
+    STEPPERS_DISABLE_PORT |= STEPPERS_DISABLE_MASK;
+    STEPPERS_DISABLE_PORT_EXT |= STEPPERS_DISABLE_MASK_EXT;
+  }
+  else
+  {
+    STEPPERS_DISABLE_PORT &= ~STEPPERS_DISABLE_MASK;
+    STEPPERS_DISABLE_PORT_EXT &= ~STEPPERS_DISABLE_MASK_EXT;
+  }
 
   // Initialize stepper output bits to ensure first ISR call does not step.
   st.step_outbits = step_port_invert_mask;
@@ -316,8 +327,16 @@ void st_go_idle()
     pin_state = true; // Override. Disable steppers.
   }
   if (bit_istrue(settings.flags,BITFLAG_INVERT_ST_ENABLE)) { pin_state = !pin_state; } // Apply pin invert.
-  if (pin_state) { STEPPERS_DISABLE_PORT |= STEPPERS_DISABLE_MASK; }
-  else { STEPPERS_DISABLE_PORT &= ~STEPPERS_DISABLE_MASK; }
+  if (pin_state)
+  {
+    STEPPERS_DISABLE_PORT |= STEPPERS_DISABLE_MASK;
+    STEPPERS_DISABLE_PORT_EXT |= STEPPERS_DISABLE_MASK_EXT;
+  }
+  else
+  {
+    STEPPERS_DISABLE_PORT &= ~STEPPERS_DISABLE_MASK;
+    STEPPERS_DISABLE_PORT_EXT &= ~STEPPERS_DISABLE_MASK_EXT;
+  }
 }
 
 
@@ -376,6 +395,7 @@ extern "C" void TIMER1_IRQHandler()
 
   // Set the direction pins a couple of nanoseconds before we step the steppers
   DIRECTION_PORT = (DIRECTION_PORT & ~DIRECTION_MASK) | (st.dir_outbits & DIRECTION_MASK);
+  DIRECTION_PORT_EXT = (DIRECTION_PORT_EXT & ~DIRECTION_MASK_EXT) | (st.dir_outbits_ext & DIRECTION_MASK_EXT);
 
   // Then pulse the stepping pins
   #ifdef STEP_PULSE_DELAY
@@ -426,6 +446,7 @@ extern "C" void TIMER1_IRQHandler()
         st.counter_x = st.counter_y = st.counter_z = (st.exec_block->step_event_count >> 1);
       }
       st.dir_outbits = st.exec_block->direction_bits ^ dir_port_invert_mask;
+      st.dir_outbits_ext = st.exec_block->direction_bits_ext ^ dir_port_invert_mask_ext;
 
       #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
         // With AMASS enabled, adjust Bresenham axis increment counters according to AMASS level.
@@ -433,7 +454,7 @@ extern "C" void TIMER1_IRQHandler()
         st.steps[Y_AXIS] = st.exec_block->steps[Y_AXIS] >> st.exec_segment->amass_level;
         st.steps[Z_AXIS] = st.exec_block->steps[Z_AXIS] >> st.exec_segment->amass_level;
         st.steps[A_AXIS] = st.exec_block->steps[A_AXIS] >> st.exec_segment->amass_level;
-        //st.steps[B_AXIS] = st.exec_block->steps[B_AXIS] >> st.exec_segment->amass_level;
+        st.steps[B_AXIS] = st.exec_block->steps[B_AXIS] >> st.exec_segment->amass_level;
         //st.steps[C_AXIS] = st.exec_block->steps[C_AXIS] >> st.exec_segment->amass_level;
       #endif
 
@@ -509,7 +530,6 @@ extern "C" void TIMER1_IRQHandler()
     if (st.exec_block->direction_bits & (1<<A_DIRECTION_BIT)) { sys_position[A_AXIS]--; }
     else { sys_position[A_AXIS]++; }
   }
-/*
   #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
     st.counter_b += st.steps[B_AXIS];
   #else
@@ -518,9 +538,10 @@ extern "C" void TIMER1_IRQHandler()
   if (st.counter_b > st.exec_block->step_event_count) {
     st.step_outbits |= (1<<B_STEP_BIT);
     st.counter_b -= st.exec_block->step_event_count;
-    if (st.exec_block->direction_bits & (1<<B_DIRECTION_BIT)) { sys_position[B_AXIS]--; }
+    if (st.exec_block->direction_bits_ext & (1<<B_DIRECTION_BIT)) { sys_position[B_AXIS]--; }
     else { sys_position[B_AXIS]++; }
   }
+  /*
   #ifdef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
     st.counter_c += st.steps[C_AXIS];
   #else
@@ -593,9 +614,24 @@ void st_generate_step_dir_invert_masks()
   uint8_t idx;
   step_port_invert_mask = 0;
   dir_port_invert_mask = 0;
-  for (idx=0; idx<N_AXIS; idx++) {
-    if (bit_istrue(settings.step_invert_mask,bit(idx))) { step_port_invert_mask |= get_step_pin_mask(idx); }
-    if (bit_istrue(settings.dir_invert_mask,bit(idx))) { dir_port_invert_mask |= get_direction_pin_mask(idx); }
+  dir_port_invert_mask_ext = 0;
+  for (idx = 0; idx < N_AXIS; idx++)
+  {
+    if (bit_istrue(settings.step_invert_mask, bit(idx)))
+    {
+      step_port_invert_mask |= get_step_pin_mask(idx);
+    }
+    if (bit_istrue(settings.dir_invert_mask, bit(idx)))
+    {
+      if (idx == 4) // B-AXIS direction uses another GPIO pins
+      {
+        dir_port_invert_mask_ext |= get_direction_pin_mask(idx);
+      }
+      else
+      {
+        dir_port_invert_mask |= get_direction_pin_mask(idx);
+      }
+    }
   }
 }
 
@@ -618,10 +654,12 @@ void st_reset()
 
   st_generate_step_dir_invert_masks();
   st.dir_outbits = dir_port_invert_mask; // Initialize direction bits to default.
+  st.dir_outbits_ext = dir_port_invert_mask_ext; // Initialize direction bits to default.
 
   // Initialize step and direction port pins.
   STEP_PORT = (STEP_PORT & ~STEP_MASK) | step_port_invert_mask;
   DIRECTION_PORT = (DIRECTION_PORT & ~DIRECTION_MASK) | dir_port_invert_mask;
+  DIRECTION_PORT_EXT = (DIRECTION_PORT_EXT & ~DIRECTION_MASK_EXT) | dir_port_invert_mask_ext;
 }
 
 
@@ -631,7 +669,9 @@ void stepper_init()
   // Configure step and direction interface pins
   STEP_DDR |= STEP_MASK;                         // Set selected stepper step pins as outputs
   STEPPERS_DISABLE_DDR |= STEPPERS_DISABLE_MASK; // Set selected stepper disable pins as outputs
+  STEPPERS_DISABLE_DDR_EXT |= STEPPERS_DISABLE_MASK_EXT; // Set selected stepper disable pins as outputs
   DIRECTION_DDR |= DIRECTION_MASK;               // Set selected stepper direction pins as outputs
+  DIRECTION_DDR_EXT |= DIRECTION_MASK_EXT;       // Set selected stepper direction pins as outputs
 
   // Configure Timer 1: Stepper Driver Interrupt
   LPC_TIM1->TCR = 0;            // disable Timer Control (0b10=Reset, 0b01=Enable)
@@ -750,6 +790,7 @@ void st_prep_buffer()
         // segment buffer finishes the prepped block, but the stepper ISR is still executing it.
         st_prep_block = &st_block_buffer[prep.st_block_index];
         st_prep_block->direction_bits = pl_block->direction_bits;
+        st_prep_block->direction_bits_ext = pl_block->direction_bits_ext;
         uint8_t idx;
         #ifndef ADAPTIVE_MULTI_AXIS_STEP_SMOOTHING
           for (idx=0; idx<N_AXIS; idx++) { st_prep_block->steps[idx] = (pl_block->steps[idx] << 1); }
